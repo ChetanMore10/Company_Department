@@ -5,10 +5,11 @@ import { addDepartment } from "../../api/departmentService"; // ✅ added import
 
 const AddDepartment = () => {
   const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name.trim()) {
@@ -16,18 +17,20 @@ const AddDepartment = () => {
       return;
     }
 
-    // ✅ Call temporary API
-    addDepartment({ name })
-      .then(() => {
-        alert("✅ Department added (temporary API)");
-        setName(""); // clear field
-        setError("");
-        navigate("/departments"); // redirect to list
-      })
-      .catch((err) => {
-        console.error("Error adding department:", err);
-        alert("⚠️ Failed to add department. Try again.");
-      });
+    try {
+      const res = await addDepartment({ name, location });
+      console.log("Add department response:", res);
+      alert("✅ Department added");
+      setName(""); // clear fields
+      setLocation("");
+      setError("");
+      navigate("/departments"); // redirect to list
+    } catch (err) {
+      // Better error reporting for debugging
+      console.error("Error adding department:", err);
+      const serverMessage = err?.response?.data || err?.message || "Unknown error";
+      alert(`⚠️ Failed to add department.\nServer: ${JSON.stringify(serverMessage)}`);
+    }
   };
 
   return (
@@ -56,6 +59,20 @@ const AddDepartment = () => {
               }}
             />
             {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
+          </div>
+
+          {/* Location Field */}
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">
+              Location
+            </label>
+            <input
+              type="text"
+              placeholder="Enter Location"
+              className="border px-3 py-2 rounded-lg w-full focus:ring outline-none border-gray-300"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
           </div>
 
           {/* Buttons */}

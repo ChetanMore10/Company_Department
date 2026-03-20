@@ -1,19 +1,64 @@
-// src/api/employeeService.js
 import axios from "axios";
 
-const API_URL = "https://jsonplaceholder.typicode.com/users"; // Temporary API
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090/api";
+// Employee API may run on a separate port; default to 9091 as provided.
+const EMPLOYEE_BASE = import.meta.env.VITE_EMPLOYEE_API_BASE_URL || "http://localhost:9091/api";
+const EMPLOYEES_URL = `${EMPLOYEE_BASE}/employees`;
 
-// Get all employees
-export const getAllEmployees = () => axios.get(API_URL);
+export const getAllEmployees = async (params = {}) => {
+	const response = await axios.get(EMPLOYEES_URL, { params });
+	return response.data;
+};
 
-// Get employee by ID
-export const getEmployeeById = (id) => axios.get(`${API_URL}/${id}`);
+export const getEmployeeById = async (id) => {
+	const response = await axios.get(`${EMPLOYEES_URL}/${id}`);
+	return response.data;
+};
 
-// Add new employee
-export const addEmployee = (data) => axios.post(API_URL, data);
+export const getEmployeesByDepartment = async (departmentId) => {
+	// Try common query param names so backend can accept either
+	const response = await axios.get(EMPLOYEES_URL, { params: { "department.id": departmentId, departmentId } });
+	return response.data;
+};
 
-// Update employee
-export const updateEmployee = (id, data) => axios.put(`${API_URL}/${id}`, data);
+export const addEmployee = async (data) => {
+	// Expected shape:
+	// {
+	//   fName: "",
+	//   lName: "",
+	//   position: "",
+	//   address: "",
+	//   department: { id: 1 }
+	// }
+	const payload = { ...data };
+	// Normalize department field: allow `department` to be id or object
+	if (payload.department && typeof payload.department !== "object") {
+		payload.department = { id: payload.department };
+	}
+	if (payload.department && payload.department.id === undefined && payload.departmentId) {
+		payload.department = { id: payload.departmentId };
+		delete payload.departmentId;
+	}
 
-// Delete employee
-export const deleteEmployee = (id) => axios.delete(`${API_URL}/${id}`);
+	const response = await axios.post(EMPLOYEES_URL, payload);
+	return response.data;
+};
+
+export const updateEmployee = async (id, data) => {
+	const payload = { ...data };
+	if (payload.department && typeof payload.department !== "object") {
+		payload.department = { id: payload.department };
+	}
+	if (payload.department && payload.department.id === undefined && payload.departmentId) {
+		payload.department = { id: payload.departmentId };
+		delete payload.departmentId;
+	}
+
+	const response = await axios.put(`${EMPLOYEES_URL}/${id}`, payload);
+	return response.data;
+};
+
+export const deleteEmployee = async (id) => {
+	const response = await axios.delete(`${EMPLOYEES_URL}/${id}`);
+	return response.data;
+};

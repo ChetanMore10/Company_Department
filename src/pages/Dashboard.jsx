@@ -14,8 +14,8 @@ const Dashboard = () => {
       try {
         const deptRes = await getAllDepartments();
         const empRes = await getAllEmployees();
-        setDepartmentCount(deptRes.data.length);
-        setEmployeeCount(empRes.data.length);
+        setDepartmentCount(deptRes.length);
+        setEmployeeCount(empRes.length);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {

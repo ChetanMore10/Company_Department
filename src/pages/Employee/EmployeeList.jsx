@@ -12,13 +12,14 @@ const EmployeeList = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await getAllEmployees();
-        // JSONPlaceholder returns {id, name, email, username} etc.
-        const mappedData = response.data.map((emp) => ({
+        const data = await getAllEmployees();
+        // Expecting employees with fields: fName, lName, position, address, department: { id }
+        const mappedData = data.map((emp) => ({
           id: emp.id,
-          name: emp.name,
-          email: emp.email,
-          department: emp.company?.name || "General",
+          name: `${emp.fName || ""} ${emp.lName || ""}`.trim() || emp.name || "-",
+          email: emp.email || "-",
+          department: emp.department?.name || emp.department?.id || "-",
+          position: emp.position || "-",
         }));
         setEmployees(mappedData);
       } catch (error) {

@@ -7,10 +7,13 @@ import { getAllDepartments, deleteDepartment } from "../../api/departmentService
 const DepartmentList = () => {
   const [departments, setDepartments] = useState([]);
 
-  const loadDepartments = () => {
-    getAllDepartments()
-      .then((res) => setDepartments(res.data))
-      .catch((err) => console.error(err));
+  const loadDepartments = async () => {
+    try {
+      const data = await getAllDepartments();
+      setDepartments(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -50,10 +53,11 @@ const DepartmentList = () => {
 
       {/* Reusable Table Component */}
       <Table
-        columns={["ID", "Department Name"]}
+        columns={["ID", "Department Name", "Location"]}
         data={departments.map((dept) => ({
           id: dept.id,
           name: dept.name,
+          location: dept.location || "-",
         }))}
         renderActions={(dept) => (
           <div className="flex justify-center gap-3">

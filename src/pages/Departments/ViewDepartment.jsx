@@ -71,7 +71,7 @@ const ViewDepartment = () => {
           </div>
 
           <p className="text-gray-500 text-sm mt-2">
-            Department ID: {department.id}
+            Department ID: {department.id} • Location: {department.location || "-"}
           </p>
         </div>
 
@@ -107,13 +107,14 @@ const ViewDepartment = () => {
                 {employees.map((emp, index) => (
                   <tr key={emp.id} className="border-b hover:bg-gray-50">
                     <td className="p-3">{index + 1}</td>
-                    <td className="p-3 font-medium">{emp.name}</td>
-                    <td className="p-3">{emp.email}</td>
+                    <td className="p-3 font-medium">
+                      {emp.fName || emp.lName
+                        ? `${emp.fName || ""} ${emp.lName || ""}`.trim()
+                        : emp.name || "-"}
+                    </td>
+                    <td className="p-3">{emp.email || "-"}</td>
                     <td className="p-3 text-center">
-                      <Link
-                        to={`/employees/view/${emp.id}`}
-                        className="text-blue-600 hover:underline"
-                      >
+                      <Link to={`/employees/${emp.id}`} className="text-blue-600 hover:underline">
                         View
                       </Link>
                     </td>

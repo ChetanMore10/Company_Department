@@ -15,8 +15,7 @@ import EditDepartment from "./pages/Departments/EditDepartment"; // ✅ NEW
 import EmployeeList from "./pages/Employee/EmployeeList";
 import AddEmployee from "./pages/Employee/AddEmployee";
 import ViewEmployee from "./pages/Employee/ViewEmployee";
-// ✅ Missing Edit route below — you’ll need it for /employees/edit/:id
-// (Optional: create EditEmployee.jsx later)
+import EditEmployee from "./pages/Employee/EditEmployee";
 
 const App = () => {
   return (
@@ -35,7 +34,7 @@ const App = () => {
           {/* Employee Routes */}
           <Route path="/employees" element={<EmployeeList />} />
           <Route path="/employees/add" element={<AddEmployee />} />
-          <Route path="/employees/edit/:id" element={<AddEmployee />} /> {/* ✅ added for edit */}
+          <Route path="/employees/edit/:id" element={<EditEmployee />} />
           <Route path="/employees/:id" element={<ViewEmployee />} />
         </Routes>
       </Layout>

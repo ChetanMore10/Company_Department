@@ -7,32 +7,37 @@ const EditDepartment = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(true);
 
   // ✅ Fetch department details (temporary API)
   useEffect(() => {
-    getDepartmentById(id)
-      .then((res) => {
-        // JSONPlaceholder returns post { title, body } instead of { name }
-        setName(res.data.title || `Department ${id}`);
-        setLoading(false);
-      })
-      .catch((err) => {
+    const load = async () => {
+      try {
+        const dept = await getDepartmentById(id);
+        setName(dept.name || dept.title || `Department ${id}`);
+        setLocation(dept.location || "");
+      } catch (err) {
         console.error("Error fetching department:", err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    load();
   }, [id]);
 
   // ✅ Handle form submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    updateDepartment(id, { name })
-      .then(() => {
-        alert("Department updated (temporary API)");
-        navigate("/departments");
-      })
-      .catch((err) => console.error("Error updating:", err));
+    try {
+      await updateDepartment(id, { name, location });
+      alert("Department updated");
+      navigate("/departments");
+    } catch (err) {
+      console.error("Error updating:", err);
+    }
   };
 
   if (loading) {

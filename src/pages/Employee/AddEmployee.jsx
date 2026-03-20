@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { getAllDepartments } from "../../api/departmentService";
+import { addEmployee } from "../../api/employeeService";
 
 const AddEmployee = () => {
   const [searchParams] = useSearchParams();
@@ -8,22 +10,35 @@ const AddEmployee = () => {
 
   const navigate = useNavigate();
   const [employee, setEmployee] = useState({
-    name: "",
+    fName: "",
+    lName: "",
     email: "",
+    position: "",
+    address: "",
     departmentId: selectedDeptId || "",
   });
 
   const [errors, setErrors] = useState({});
 
-  const departments = [
-    { id: 1, name: "IT" },
-    { id: 2, name: "HR" },
-    { id: 3, name: "Finance" },
-  ];
+  const [departments, setDepartments] = useState([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await getAllDepartments();
+        setDepartments(data);
+      } catch (err) {
+        console.error("Error loading departments:", err);
+      }
+    };
+
+    load();
+  }, []);
 
   const validate = () => {
     let newErrors = {};
-    if (!employee.name.trim()) newErrors.name = "Employee name is required!";
+    if (!employee.fName.trim()) newErrors.fName = "First name is required!";
+    if (!employee.lName.trim()) newErrors.lName = "Last name is required!";
     if (!employee.email.trim()) newErrors.email = "Email is required!";
     if (!employee.departmentId)
       newErrors.departmentId = "Select a department!";
@@ -32,14 +47,28 @@ const AddEmployee = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validate()) return;
 
-    console.log("Saved Employee:", employee);
+    const payload = {
+      fName: employee.fName,
+      lName: employee.lName,
+      position: employee.position,
+      address: employee.address,
+      email: employee.email,
+      department: { id: Number(employee.departmentId) },
+    };
 
-    navigate("/employees");
+    try {
+      await addEmployee(payload);
+      alert("Employee added");
+      navigate("/employees");
+    } catch (err) {
+      console.error("Error adding employee:", err);
+      alert("Failed to add employee. Check console for details.");
+    }
   };
 
   return (
@@ -55,21 +84,43 @@ const AddEmployee = () => {
             <label className="text-gray-700 font-medium mb-1 block">
               Employee Name <span className="text-red-600">*</span>
             </label>
-            <input
-              type="text"
-              className={`border px-3 py-2 rounded-lg w-full outline-none focus:ring ${
-                errors.name ? "border-red-500" : "border-gray-300"
-              }`}
-              placeholder="Enter name"
-              value={employee.name}
-              onChange={(e) => {
-                setEmployee({ ...employee, name: e.target.value });
-                setErrors({ ...errors, name: "" });
-              }}
-            />
-            {errors.name && (
-              <p className="text-red-600 text-sm mt-1">{errors.name}</p>
-            )}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <input
+                  type="text"
+                  className={`border px-3 py-2 rounded-lg w-full outline-none focus:ring ${
+                    errors.fName ? "border-red-500" : "border-gray-300"
+                  }`}
+                  placeholder="First name"
+                  value={employee.fName}
+                  onChange={(e) => {
+                    setEmployee({ ...employee, fName: e.target.value });
+                    setErrors({ ...errors, fName: "" });
+                  }}
+                />
+                {errors.fName && (
+                  <p className="text-red-600 text-sm mt-1">{errors.fName}</p>
+                )}
+              </div>
+
+              <div>
+                <input
+                  type="text"
+                  className={`border px-3 py-2 rounded-lg w-full outline-none focus:ring ${
+                    errors.lName ? "border-red-500" : "border-gray-300"
+                  }`}
+                  placeholder="Last name"
+                  value={employee.lName}
+                  onChange={(e) => {
+                    setEmployee({ ...employee, lName: e.target.value });
+                    setErrors({ ...errors, lName: "" });
+                  }}
+                />
+                {errors.lName && (
+                  <p className="text-red-600 text-sm mt-1">{errors.lName}</p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Email */}
@@ -92,6 +143,29 @@ const AddEmployee = () => {
             {errors.email && (
               <p className="text-red-600 text-sm mt-1">{errors.email}</p>
             )}
+          </div>
+
+          {/* Position */}
+          <div className="mb-4">
+            <label className="text-gray-700 font-medium mb-1 block">Position</label>
+            <input
+              type="text"
+              className="border px-3 py-2 rounded-lg w-full outline-none focus:ring border-gray-300"
+              placeholder="Enter position"
+              value={employee.position}
+              onChange={(e) => setEmployee({ ...employee, position: e.target.value })}
+            />
+          </div>
+
+          {/* Address */}
+          <div className="mb-4">
+            <label className="text-gray-700 font-medium mb-1 block">Address</label>
+            <textarea
+              className="border px-3 py-2 rounded-lg w-full outline-none focus:ring border-gray-300"
+              placeholder="Enter address"
+              value={employee.address}
+              onChange={(e) => setEmployee({ ...employee, address: e.target.value })}
+            />
           </div>
 
           {/* Department Select */}
